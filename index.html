@@ -125,15 +125,15 @@ const ACTS=[
  {id:"a2",icon:"🍠",name:"サツマイモの苗植え",date:"2026-06-05",time:"9:00〜10:00",place:"学校菜園",desc:"2年生の生活科で使うサツマイモの苗を植えます。",status:"done",att:6,thanks:"秋の収穫が楽しみですね。ありがとうございました！"},
  {id:"a3",icon:"🌿",name:"二者面談前の草むしり",date:"2026-07-16",time:"8:30〜9:30",place:"体育館前の花壇・玄関前のプランター",desc:"面談で来校する保護者の皆さんを、きれいな花壇でお迎えします。",status:"done",att:8,thanks:"朝早くからありがとうございました。熱中症にならず何よりです。"},
  {id:"a4",icon:"💧",name:"学校閉庁日の花壇の水やり",date:"2026-08-08",end:"2026-08-16",time:"朝か夕方のご都合のよい時間",place:"体育館前の花壇・玄関前のプランター",desc:"先生方がいない閉庁日の間、交代で水やりをします。1日1人いれば十分です。",status:"done",att:9,duty:true,roster:{"08-08":["佐藤さん"],"08-09":["田中さん"],"08-10":["あなた"],"08-11":["山本さん"],"08-12":["中村さん","小林さん"],"08-13":["加藤さん"],"08-14":["吉田さん"],"08-15":["佐藤さん"],"08-16":["あなた"]},thanks:"お盆の時期にもかかわらず、9日間、1日も欠かさず水やりできました！"},
- {id:"a5",icon:"🪴",name:"子ども大学前の花の植え替え",date:"2026-10-29",time:"9:00〜10:30",place:"体育館前の花壇・玄関前のプランター",desc:"子ども大学に来る地域の皆さんを、秋の花でお迎えします。",status:"done",att:7,thanks:"パンジーがとても映えています。ありがとうございました！"},
+ {id:"a5",icon:"🪴",name:"子ども大学前の花の植え替え",date:"2026-10-29",time:"9:00〜10:30",place:"体育館前の花壇・玄関前のプランター",desc:"子ども大学に来る地域の皆さんを、秋の花でお迎えします。",status:"done",att:7,thanks:"ビオラがとても映えています。ありがとうございました！"},
  {id:"a6",icon:"🌸",name:"卒業式前の花壇のお手入れ",date:"2027-03-04",time:"9:00〜10:30",place:"体育館前の花壇・玄関前のプランター",desc:"卒業式に向けて、体育館前の花壇と玄関前のプランターのお手入れをします。",status:"tent",when:"3月上旬（卒業式の前）"},
  {id:"a7",icon:"🌼",name:"卒業式前日 菜の花の花道づくり",date:"2027-03-16",time:"14:00〜15:30",place:"体育館前〜正門",desc:"卒業式の前日に、卒業生が通る道を菜の花で飾る花道をつくります。日にちは卒業式で決まるので、日程調整はしません。",status:"tent",fixed:true,when:"卒業式の前日"}
 ];
 const PH_BG=["linear-gradient(135deg,#FFE3EC,#FFC3D3)","linear-gradient(135deg,#E6F6DC,#BFE3A8)","linear-gradient(135deg,#FFF3C9,#FFD978)","linear-gradient(135deg,#DDF0FF,#B4DBF7)"];
 
 let S={role:"member",view:"home",acts:ACTS,photos:{},planted:0,nextYear:null};
-try{const v=JSON.parse(localStorage.getItem("hanadayori"));if(v&&v.v===6)S=Object.assign(S,v.s)}catch(e){}
-function save(){try{localStorage.setItem("hanadayori",JSON.stringify({v:6,s:Object.assign({},S,{photos:{}})}))}catch(e){}}
+try{const v=JSON.parse(localStorage.getItem("hanadayori"));if(v&&v.v===7)S=Object.assign(S,v.s)}catch(e){}
+function save(){try{localStorage.setItem("hanadayori",JSON.stringify({v:7,s:Object.assign({},S,{photos:{}})}))}catch(e){}}
 const $=id=>document.getElementById(id);
 const W=["日","月","火","水","木","金","土"];
 const fd=(s,opt)=>{const d=new Date(s+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDate()+(opt===false?"":"（"+W[d.getDay()]+"）")};
