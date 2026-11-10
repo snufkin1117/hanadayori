@@ -94,6 +94,16 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
 .toast .big{font-size:46px}.toast .m{font-weight:800;margin-top:4px}
 .tip{background:#FFF8E6;border-radius:14px;padding:10px 12px;font-size:12px;line-height:1.7;margin-top:10px}
 .row{display:flex;gap:8px;flex-wrap:wrap}
+.app{padding-top:10px}
+.next h2{font-size:18px;margin:2px 0 0}
+.next .big{font-size:38px}
+.more{display:block;text-align:right;font-size:12px;font-weight:700;color:var(--main);margin-top:8px;cursor:pointer;background:none;border:none;font-family:inherit;width:100%}
+.mini{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;background:linear-gradient(#C9A27A,#A87E55);border-radius:12px;padding:6px 6px 4px;cursor:pointer}
+.mini span{font-size:13px;line-height:1.25;text-align:center}
+.mini span.empty:after{content:"・";color:#8a6542;font-size:10px}
+.mini span.new{animation:grow .9s ease}
+.cand{padding:6px 0}
+.ox button{width:38px;height:38px}
 .pm{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:16px;font-weight:800;color:var(--main);cursor:pointer;font-family:inherit;line-height:1}
 </style>
 </head>
@@ -103,13 +113,14 @@ textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px
     <div><h1>🌼 花だより</h1><div class="sub">日の里西小 栽培ボランティア <span style="background:#33402e;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px">β版</span></div></div>
     <div class="role"><button data-r="member" class="on">メンバー</button><button data-r="leader">代表</button></div>
   </header>
-  <div class="tip" style="margin:0 0 12px">🧪 お試し用のβ版です。記録や写真はこのスマホの中だけに保存され、ほかの人には届きません。右上で「メンバー」と「代表」の画面を切り替えて、自由に触ってみてください。</div>
+  <p class="small" style="margin:-6px 0 10px">🧪 β版：記録や写真はこのスマホの中だけに保存されます</p>
   <main id="main"></main>
 </div>
 <nav class="nav"><div>
   <button data-v="home" class="on"><span class="ic">🏡</span>ホーム</button>
   <button data-v="year"><span class="ic">📅</span>年間</button>
   <button data-v="album"><span class="ic">📷</span>アルバム</button>
+  <button data-v="admin" id="adminTab" class="hidden"><span class="ic">🧑‍🌾</span>管理</button>
 </div></nav>
 <div class="modal hidden" id="modal"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"><div class="big" id="tIc"></div><div class="m" id="tM"></div></div>
@@ -148,40 +159,57 @@ function totalAtt(){return S.acts.reduce((n,a)=>n+(a.att||0),0)+S.planted}
 function home(){
   const a=nextAct();let h="";
   if(a){
-    h+=`<div class="card next"><div class="row" style="justify-content:space-between;align-items:center"><span class="small">次の作業</span>${stChip(a)}</div>
-      <div style="display:flex;gap:12px;align-items:center;margin-top:6px"><div class="big">${a.icon}</div><div><h2>${a.name}</h2><div class="small">${a.status==="conf"?fd(a.date)+" "+a.time:a.status==="plan"?"候補日："+a.cands.map(c=>fd(c,false)).join("・"):"時期："+when(a)}</div></div></div>`;
-    if(a.status==="tent")h+=`<p style="font-size:14px;line-height:1.8;margin:12px 0 0">${a.desc}</p><div class="tip">🗓 日程は、決まり次第このアプリとLINEでお知らせします。</div>`;
+    h+=`<div class="card next" style="padding:14px 16px"><div class="row" style="justify-content:space-between;align-items:center"><span class="small">次の作業</span>${stChip(a)}</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:4px"><div class="big">${a.icon}</div><div><h2>${a.name}</h2><div class="small">${a.status==="conf"?fd(a.date)+" "+a.time:a.status==="plan"?"日程調整中：ご都合を教えてください":"時期："+when(a)}</div></div></div>`;
+    if(a.status==="tent")h+=`<div class="tip" style="margin-top:10px">🗓 日程は、決まり次第このアプリとLINEでお知らせします。</div>`;
     if(a.status==="plan"){
-      h+=`<p class="sec" style="margin-top:14px">🗓 ご都合を教えてください</p>`;
+      h+=`<div style="margin-top:6px">`;
       a.cands.forEach(c=>{const v=(a.votes[ME]||{})[c];const n=Object.values(a.votes).filter(x=>x[c]==="o").length;
         h+=`<div class="cand"><span class="d">${fd(c)}</span><span class="tally">○ ${n}人</span><span class="ox">${["o","t","x"].map(k=>`<button class="${k}${v===k?" on":""}" data-vote="${a.id}|${c}|${k}">${k==="o"?"○":k==="t"?"△":"×"}</button>`).join("")}</span></div>`});
-      h+=`<p class="small" style="margin:8px 0 0">○を付けると、みんなの花壇に芽が出ます🌱</p>`;
+      h+=`</div>`;
     }
     if(a.status==="conf"&&isDay(a)){
       const done=(a.checkin||[]).includes(ME);
-      h+=`<div class="tip" style="background:#EEF8EA;text-align:center;font-size:14px">🌷 <b>今日は作業日です！</b><br>参加した人は、花壇に花を植えましょう</div>
-      <div style="margin-top:12px">${done?`<button class="btn ghost" data-checkin="${a.id}">✅ 花を植えました（取り消す）</button>`:`<button class="btn" style="font-size:18px;padding:18px" data-checkin="${a.id}">🌷 参加しました！花を植える</button>`}</div>
-      <p class="small" style="text-align:center;margin:8px 0 0">今日植えられた花：${(a.checkin||[]).length}本</p>`;
+      h+=`<div style="margin-top:12px">${done?`<button class="btn ghost" data-checkin="${a.id}">✅ 花を植えました（取り消す）</button>`:`<button class="btn" style="font-size:17px;padding:16px" data-checkin="${a.id}">🌷 参加しました！花を植える</button>`}</div>
+      <p class="small" style="text-align:center;margin:6px 0 0">今日は作業日です｜植えられた花：${(a.checkin||[]).length}本</p>`;
     }
     else if(a.status==="conf"){
       const joined=(a.join||[]).includes(ME);const days=Math.ceil((new Date(a.date)-new Date(new Date().toDateString()))/864e5);
-      h+=`<div class="tip">📍 ${a.place}<br>🧤 道具は学校にそろっています。手ぶらでどうぞ</div>
-      <div style="margin-top:12px">${joined?`<button class="btn ghost" data-join="${a.id}">✅ 参加予定です（取り消す）</button>`:`<button class="btn" data-join="${a.id}">参加します！</button>`}</div>
-      ${days>0?`<p class="small" style="text-align:center;margin:8px 0 0">作業日まで あと${days}日</p>`:""}`;
+      h+=`<p class="small" style="margin:8px 0 0">📍 ${a.place}　🧤 手ぶらでどうぞ</p>
+      <div style="margin-top:10px">${joined?`<button class="btn ghost" data-join="${a.id}">✅ 参加予定です（取り消す）</button>`:`<button class="btn" data-join="${a.id}">参加します！</button>`}</div>
+      ${days>0?`<p class="small" style="text-align:center;margin:6px 0 0">作業日まで あと${days}日</p>`:""}`;
     }
-    h+=`<div style="margin-top:12px"><button class="btn ghost" data-open="${a.id}">くわしく見る</button></div></div>`;
+    h+=`<button class="more" data-open="${a.id}">くわしく見る ›</button></div>`;
   }
-  if(S.role==="leader"&&a)h+=leaderPanel(a);
-  // みんなの花壇
-  // 花＝確定した参加人数＋当日に植えた人数、芽＝参加予定（○や「参加します」）の人数
-  const n=S.acts.reduce((k,x)=>k+(x.status==="done"?(x.att||0):(x.checkin||[]).length),0),sp=a?sprouts(a):0,cells=64;
-  const kinds=["🌷","🌼","🌸","🌻","🌺","🌷","🌼","🪻"];
-  const pick=i=>kinds[(i*7+Math.floor(i/3))%kinds.length];
-  h+=`<div class="card"><p class="sec">🌼 今年度のみんなの花壇</p><div class="garden" id="garden">${Array.from({length:cells},(_,i)=>i<n?`<span class="${i===n-1&&S.justBloom?"new":""}">${pick(i)}</span>`:i<n+sp?`<span class="${i===n+sp-1&&S.justPlanted?"new":""}">🌱</span>`:'<span class="empty"></span>').join("")}</div>
-    <p class="small" style="margin:8px 0 0">日程に○を付けたり参加を連絡したりすると芽が出て🌱、作業の日に「花を植える」を押すと花が咲きます。今年度は、のべ<b>${n}</b>人分の花が咲きました。</p></div>`;
+  // みんなの花壇（小さく。タップで大きく）
+  const n=S.acts.reduce((k,x)=>k+(x.status==="done"?(x.att||0):(x.checkin||[]).length),0),sp=a?sprouts(a):0;
+  const cells=Math.max(48,Math.ceil((n+sp+4)/16)*16);
+  h+=`<div class="card" style="padding:14px 16px"><div class="row" style="justify-content:space-between;align-items:baseline;margin-bottom:8px"><span class="sec" style="margin:0">🌼 みんなの花壇</span><span class="small">今年度 のべ<b>${n}</b>人</span></div>
+    <div class="mini" id="garden" data-bigg="1">${gardenCells(n,sp,cells)}</div></div>`;
   S.justPlanted=false;S.justBloom=false;
   // あゆみ
-  h+=`<div class="card"><p class="sec">🌱 今年度のあゆみ</p><div class="journey">${S.acts.map(x=>`<div class="jn ${x.status==="done"?"done":x===a?"now":""}" data-open="${x.id}"><div class="ic">${x.status==="done"||x===a?x.icon:"・"}</div><div class="m">${md(x.date)}月</div></div>`).join("")}</div></div>`;
+  h+=`<div class="card" style="padding:14px 16px"><p class="sec">🌱 今年度のあゆみ</p><div class="journey">${S.acts.map(x=>`<div class="jn ${x.status==="done"?"done":x===a?"now":""}" data-open="${x.id}"><div class="ic">${x.status==="done"||x===a?x.icon:"・"}</div><div class="m">${md(x.date)}月</div></div>`).join("")}</div></div>`;
+  return h;
+}
+function gardenCells(n,sp,cells){
+  const kinds=["🌷","🌼","🌸","🌻","🌺","🌷","🌼","🪻"];const pick=i=>kinds[(i*7+Math.floor(i/3))%kinds.length];
+  return Array.from({length:cells},(_,i)=>i<n?`<span class="${i===n-1&&S.justBloom?"new":""}">${pick(i)}</span>`:i<n+sp?`<span class="${i===n+sp-1&&S.justPlanted?"new":""}">🌱</span>`:'<span class="empty"></span>').join("");
+}
+function bigGarden(){
+  const a=nextAct();const n=S.acts.reduce((k,x)=>k+(x.status==="done"?(x.att||0):(x.checkin||[]).length),0),sp=a?sprouts(a):0;
+  $("sheet").innerHTML=`<button class="close" id="cls">✕</button><p class="sec">🌼 今年度のみんなの花壇</p><div class="garden">${gardenCells(n,sp,Math.max(64,Math.ceil((n+sp)/8)*8))}</div>
+  <p class="small">日程に○を付けたり参加を連絡したりすると芽が出て🌱、作業の日に「花を植える」を押すと花が咲きます。今年度は、のべ<b>${n}</b>人分の花が咲きました。</p>
+  <p class="small" style="margin:0">${S.acts.filter(x=>x.status==="done").map(x=>`${x.icon} ${x.name}：${x.att}人`).join("<br>")}</p>`;
+  $("modal").classList.remove("hidden");$("cls").onclick=()=>$("modal").classList.add("hidden");
+}
+/* ===== 管理（代表だけ） ===== */
+function admin(){
+  const a=nextAct();let h="";
+  if(a)h+=`<div class="card" style="padding:12px 16px"><span class="small">次の作業</span><div style="font-weight:800;margin-top:2px">${a.icon} ${a.name} ${stChip(a)}</div></div>`+leaderPanel(a);
+  h+=`<div class="card"><p class="sec">🌷 これまでの参加人数</p><p class="small" style="margin-top:0">アプリを使い始める前の作業は、だいたいの人数に合わせてください。その数の花が花壇に咲きます。</p>`;
+  S.acts.filter(x=>x.status==="done").forEach(x=>{h+=`<div class="yr" style="cursor:default"><div class="ic">${x.icon}</div><div class="bd"><b>${x.name}</b></div><span style="display:inline-flex;align-items:center;gap:6px"><button class="pm" data-attadj="${x.id}|-1">−</button><b style="font-size:14px;min-width:34px;text-align:center">${x.att}人</b><button class="pm" data-attadj="${x.id}|1">＋</button></span></div>`});
+  h+=`</div><div class="card"><p class="sec">🔁 来年度の予定をつくる</p><p class="small" style="margin-top:0">今年度と同じ作業を、来年度の「予告」としてだいたいの時期で並べます。</p>
+    <button class="btn" id="mkNext">2027年度の予定を作成</button>${S.nextYear?`<div style="margin-top:12px">${S.nextYear.map(x=>`<div class="yr"><div class="mo">${md(x.date)}月<small>未定</small></div><div class="ic">${x.icon}</div><div class="bd"><b>${x.name}</b><span class="chip st-tent">予告</span> <span class="small">${when(x)}</span></div></div>`).join("")}</div>`:""}</div>`;
   return h;
 }
 function isDay(a){return a.dayMode||a.date<=new Date().toISOString().slice(0,10)}
@@ -229,13 +257,8 @@ function lineText(kind){
 /* ===== 年間 ===== */
 function year(){
   let h=`<div class="card"><p class="sec">📅 2026年度の年間予定</p>`;
-  S.acts.forEach(a=>{h+=`<div class="yr" data-open="${a.id}"><div class="mo">${md(a.date)}月<small>${a.status==="tent"||a.status==="plan"?"未定":fd(a.date,false)+(a.end?"〜"+fd(a.end,false):"")}</small></div><div class="ic">${a.icon}</div><div class="bd"><b>${a.name}</b>${stChip(a)}${a.status==="tent"?` <span class="small">${when(a)}</span>`:""}${a.status==="done"?(S.role==="leader"?`<span class="step" style="display:inline-flex;align-items:center;gap:6px;margin-left:6px"><button class="pm" data-attadj="${a.id}|-1">−</button><b style="font-size:14px;min-width:34px;text-align:center">${a.att}人</b><button class="pm" data-attadj="${a.id}|1">＋</button></span>`:` <span class="small">${a.att}人参加</span>`):""}</div></div>`});
-  if(S.role==="leader")h+=`<p class="small" style="margin:10px 0 0">💡 アプリを使い始める前の作業は、参加人数を「−」「＋」でだいたいの数に合わせてください。その人数分の花が、最初から花壇に咲いた状態になります。アプリを使い始めてからは、当日の「花を植える」で自動的に数えられます。</p>`;
+  S.acts.forEach(a=>{h+=`<div class="yr" data-open="${a.id}"><div class="mo">${md(a.date)}月<small>${a.status==="tent"||a.status==="plan"?"未定":fd(a.date,false)+(a.end?"〜"+fd(a.end,false):"")}</small></div><div class="ic">${a.icon}</div><div class="bd"><b>${a.name}</b>${stChip(a)}${a.status==="tent"?` <span class="small">${when(a)}</span>`:""}${a.status==="done"?` <span class="small">${a.att}人参加</span>`:""}</div></div>`});
   h+=`</div>`;
-  if(S.role==="leader"){
-    h+=`<div class="card"><p class="sec">🔁 来年度の予定をつくる</p><p class="small" style="margin-top:0">今年度と同じ作業を、来年度の「予告」としてだいたいの時期（上旬・中旬・下旬）で並べます。日にちは書かず、日程調整を始めるときに候補日を入れます。</p>
-    <button class="btn" id="mkNext">2027年度の予定を作成</button>${S.nextYear?`<div style="margin-top:12px">${S.nextYear.map(x=>`<div class="yr"><div class="mo">${md(x.date)}月<small>未定</small></div><div class="ic">${x.icon}</div><div class="bd"><b>${x.name}</b><span class="chip st-tent">予告</span> <span class="small">${when(x)}</span></div></div>`).join("")}</div>`:""}</div>`;
-  }
   return h;
 }
 function shiftYear(s){const d=new Date(s+"T00:00:00");const wd=d.getDay();const n=new Date(d);n.setFullYear(d.getFullYear()+1);let best=n,bd=9;for(let k=-3;k<=3;k++){const t=new Date(n);t.setDate(n.getDate()+k);if(t.getDay()===wd&&Math.abs(k)<bd){best=t;bd=Math.abs(k)}}return best.getFullYear()+"-"+String(best.getMonth()+1).padStart(2,"0")+"-"+String(best.getDate()).padStart(2,"0")}
@@ -291,16 +314,19 @@ $("modal").onclick=e=>{if(e.target.id==="modal")$("modal").classList.add("hidden
 
 /* ===== 描画とイベント ===== */
 function render(){
-  $("main").innerHTML=S.view==="home"?home():S.view==="year"?year():album();
+  if(S.role!=="leader"&&S.view==="admin")S.view="home";
+  $("adminTab").classList.toggle("hidden",S.role!=="leader");
+  $("main").innerHTML=S.view==="home"?home():S.view==="year"?year():S.view==="admin"?admin():album();
   document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===S.view));
   document.querySelectorAll(".role button").forEach(b=>b.classList.toggle("on",b.dataset.r===S.role));
   save();
 }
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-vote],[data-open],[data-fix],[data-copy],[data-join],[data-duty],[data-addph],[data-viewph],[data-startplan],[data-setfixed],[data-dayon],[data-checkin],[data-attfix],[data-attadj],#mkNext");if(!t)return;
+  const t=e.target.closest("[data-vote],[data-open],[data-fix],[data-copy],[data-join],[data-duty],[data-addph],[data-viewph],[data-bigg],[data-startplan],[data-setfixed],[data-dayon],[data-checkin],[data-attfix],[data-attadj],#mkNext");if(!t)return;
   if(t.dataset.startplan){startPlan(t.dataset.startplan);return}
   if(t.dataset.setfixed){setFixed(t.dataset.setfixed);return}
   if(t.dataset.viewph){viewPhoto(t.dataset.viewph);return}
+  if(t.dataset.bigg){bigGarden();return}
   if(t.dataset.attadj){const[id,d]=t.dataset.attadj.split("|");const a=S.acts.find(x=>x.id===id);a.att=Math.max(0,(a.att||0)+(+d));render();return}
   if(t.dataset.dayon){const a=S.acts.find(x=>x.id===t.dataset.dayon);a.dayMode=true;a.join=a.join||[];
     // 試作版：参加予定の人のうち何人かは、もう花を植えた状態にしておく
@@ -308,13 +334,13 @@ document.addEventListener("click",e=>{
   if(t.dataset.checkin){const a=S.acts.find(x=>x.id===t.dataset.checkin);a.checkin=a.checkin||[];
     if(a.checkin.includes(ME))a.checkin=a.checkin.filter(m=>m!==ME);
     else{a.checkin.push(ME);a.join=a.join||[];if(!a.join.includes(ME))a.join.push(ME);S.justBloom=true;toast("🌷","花を植えました！")}
-    render();if(S.justBloom)setTimeout(()=>$("garden")&&$("garden").scrollIntoView({behavior:"smooth",block:"center"}),300);return}
+    render();return}
   if(t.dataset.attfix){const a=S.acts.find(x=>x.id===t.dataset.attfix);const ck=[...document.querySelectorAll("#attList input:checked")].map(x=>x.value);
     a.checkin=ck;a.att=ck.length;a.status="done";a.thanks=a.thanks||"ご参加ありがとうございました！写真はアルバムに入れてください📷";toast("💐",ck.length+"人の参加で確定しました");render();return}
   if(t.dataset.vote){const[id,c,k]=t.dataset.vote.split("|");const a=S.acts.find(x=>x.id===id);a.votes[ME]=a.votes[ME]||{};const was=a.votes[ME][c];a.votes[ME][c]=k;
     const before=Object.entries(a.votes[ME]).some(([d,x])=>d!==c&&x==="o")||was==="o";
     if(k==="o"&&!before){S.justPlanted=true;toast("🌱","花壇に芽が出ました")}
-    render();if(S.justPlanted)setTimeout(()=>$("garden")&&$("garden").scrollIntoView({behavior:"smooth",block:"center"}),300)}
+    render()}
   else if(t.dataset.open)openAct(t.dataset.open);
   else if(t.dataset.fix){const[id,c]=t.dataset.fix.split("|");const a=S.acts.find(x=>x.id===id);a.date=c;a.status="conf";a.join=Object.entries(a.votes).filter(([m,v])=>v[c]==="o").map(([m])=>m);toast("📌",fd(c)+"に決定しました");render()}
   else if(t.dataset.join){const a=S.acts.find(x=>x.id===t.dataset.join);a.join=a.join||[];if(a.join.includes(ME)){a.join=a.join.filter(m=>m!==ME)}else{a.join.push(ME);S.justPlanted=true;toast("🌱","参加の連絡をしました")}render()}
